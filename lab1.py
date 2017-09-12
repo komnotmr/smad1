@@ -4,6 +4,7 @@ import sys
 import random
 import numpy as np
 import chart
+import globals
 
 keys = ['--gen-sigm', '--gen-points', '--error', '--no-error', '--c']
 
@@ -30,7 +31,7 @@ def help():
 if __name__ == '__main__':
     if len(sys.argv) < 4:
         if len(sys.argv) > 2:
-            if sys.argv[1] != keys[4] or sys.argv[2] not in [keys[2],keys[3]]:
+            if sys.argv[1] not in [keys[4], keys[0]] or sys.argv[2] not in [keys[2],keys[3]]:
                 help()
                 sys.exit()
         else:
@@ -39,18 +40,19 @@ if __name__ == '__main__':
     elif not (sys.argv[1] in [keys[0], keys[1]] and sys.argv[2] in [keys[2],keys[3]]):
         help()
         sys.exit()
-    if (sys.argv[1] != keys[4]):
+    if (sys.argv[1] != keys[4] and sys.argv[1] != keys[0]):
         filename = sys.argv[3]
         f_out = open(filename, 'w')
         if not f_out:
             print 'Error, can\'t create file'
-    x_d = [-1.0, 1.0]
+    x_d = globals.G_x_d
     t = [0.5, 1, 0.01, 0.01, -1]
-    h = 0.25
-    s = 0.0835923427734
-    m = 0
-    x1 = x_d[0]
-    x2 = x_d[0]
+    h = globals.G_h
+    s = globals.G_sygm
+    m = globals.G_m
+    p = globals.G_p
+    x1 = globals.G_x1
+    x2 = globals.G_x2
     resultsxyz = [[],[],[]]
     while(x1 <= x_d[1]):
         while(x2 <= x_d[1]):
@@ -65,11 +67,20 @@ if __name__ == '__main__':
         x2 = x_d[0]
     if (sys.argv[1] != keys[4]):
         if keys[0] == sys.argv[1]:
-            f_out.write(str(getS(resultsxyz[2])*0.15))
-            f_out.write('\n')
+            with open('./globals.py') as f:
+                text = f.read()
+                text = text.split('\n')
+                text = text[0:len(text)-1]
+            f = open('./globals.py', 'w')
+            for t in text:
+                f.write(t+'\n')
+            f.write('G_sygm = {s}\n'.format(s = getS(resultsxyz[2])*p ))
+            f.close()
+            #f_out.write(str(getS(resultsxyz[2])*p))
+            #f_out.write('\n')
         elif keys[1] == sys.argv[1]:
             for i in range(len(resultsxyz[0])):
                 f_out.write(str(resultsxyz[0][i])+'\t'+str(resultsxyz[1][i])+'\t'+str(resultsxyz[2][i])+'\n')
-        f_out.close()
+            f_out.close()
 
     chart.draw3D(resultsxyz)
