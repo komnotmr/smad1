@@ -1,15 +1,11 @@
 #!/usr/bin/python
 
-import sys
-import random
-import numpy as np
-import chart
-import globals
+import sys  # for keys
+import random # for generate e
+import chart # draw 3D graph
+import globals as G# consist sigma, limitations and other
 
 keys = ['--gen-sigm', '--gen-points', '--error', '--no-error', '--c']
-
-def func(x,t):
-    return t[0]+t[1]*x[0]+t[2]*x[0]**2+t[3]*x[1]+t[4]*x[1]**2
 
 def e(m,s):
     return random.normalvariate(m,s)
@@ -45,26 +41,18 @@ if __name__ == '__main__':
         f_out = open(filename, 'w')
         if not f_out:
             print 'Error, can\'t create file'
-    x_d = globals.G_x_d
-    t = [0.5, 1, 0.01, 0.01, -1]
-    h = globals.G_h
-    s = globals.G_sygm
-    m = globals.G_m
-    p = globals.G_p
-    x1 = globals.G_x1
-    x2 = globals.G_x2
     resultsxyz = [[],[],[]]
-    while(x1 <= x_d[1]):
-        while(x2 <= x_d[1]):
-            resultsxyz[0].append(x1)
-            resultsxyz[1].append(x2)
+    while(G.x1 <= G.x_d[1]):
+        while(G.x2 <= G.x_d[1]):
+            resultsxyz[0].append(G.x1)
+            resultsxyz[1].append(G.x2)
             if sys.argv[2] == keys[2]:
-                resultsxyz[2].append(func([x1,x2],t) + e(m, s))
+                resultsxyz[2].append(G.n([G.x1,G.x2], G.t) + e(G.m, G.sygm))
             else:
-                resultsxyz[2].append(func([x1,x2],t))
-            x2 = x2 + h
-        x1 = x1 + h
-        x2 = x_d[0]
+                resultsxyz[2].append(G.n([G.x1,G.x2], G.t))
+            G.x2 = G.x2 + G.h
+        G.x1 = G.x1 + G.h
+        G.x2 = G.x_d[0]
     if (sys.argv[1] != keys[4]):
         if keys[0] == sys.argv[1]:
             with open('./globals.py') as f:
@@ -74,13 +62,10 @@ if __name__ == '__main__':
             f = open('./globals.py', 'w')
             for t in text:
                 f.write(t+'\n')
-            f.write('G_sygm = {s}\n'.format(s = getS(resultsxyz[2])*p ))
+            f.write('sygm = {s}'.format(s = getS(resultsxyz[2])*G.p ))
             f.close()
-            #f_out.write(str(getS(resultsxyz[2])*p))
-            #f_out.write('\n')
         elif keys[1] == sys.argv[1]:
             for i in range(len(resultsxyz[0])):
                 f_out.write(str(resultsxyz[0][i])+'\t'+str(resultsxyz[1][i])+'\t'+str(resultsxyz[2][i])+'\n')
             f_out.close()
-
     chart.draw3D(resultsxyz)
